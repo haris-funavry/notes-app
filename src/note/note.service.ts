@@ -1,20 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { UpdateOptions } from 'sequelize';
-import { CreateNoteDto } from './dtos/createNoteDto';
+import { CreateNoteDto } from './dtos/create-note.dto';
 import { UpdateNoteDto } from './dtos/updateNoteDto';
 import { Note } from './entities/note.entity';
 
 @Injectable()
 export class NoteService {
-  constructor(@InjectModel(Note) private noteEntity: typeof Note) {}
+  constructor(@InjectModel(Note) private noteRepository: typeof Note) {}
 
   getAllNotes(): Promise<{ rows: Note[]; count: Number }> {
-    return this.noteEntity.findAndCountAll<Note>();
+    return this.noteRepository.findAndCountAll<Note>();
   }
 
   async getNoteWithId(id: number): Promise<Note> {
-    const note = await this.noteEntity.findByPk<Note>(id);
+    const note = await this.noteRepository.findByPk<Note>(id);
 
     if (!note) {
       throw new NotFoundException();
@@ -24,14 +24,14 @@ export class NoteService {
   }
 
   createNote(createNoteDto: CreateNoteDto): Promise<Note> {
-    return this.noteEntity.create<Note>({ ...createNoteDto });
+    return this.noteRepository.create<Note>({ ...createNoteDto });
   }
 
   async updateNote(
     updateNoteDto: UpdateNoteDto,
     updateOptions: UpdateOptions<Note>,
   ): Promise<[affectedCount: number]> {
-    const updateResult = await this.noteEntity.update<Note>(
+    const updateResult = await this.noteRepository.update<Note>(
       updateNoteDto,
       updateOptions,
     );
@@ -44,6 +44,6 @@ export class NoteService {
   }
 
   deleteNoteWithId(id: number): Promise<number> {
-    return this.noteEntity.destroy<Note>({ where: { id } });
+    return this.noteRepository.destroy<Note>({ where: { id } });
   }
 }

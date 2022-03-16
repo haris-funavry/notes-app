@@ -6,12 +6,13 @@ import { AppService } from './app.service';
 import { NoteModule } from './note/note.module';
 import { UserModule } from './user/user.module';
 import 'dotenv/config';
+import { Dialect } from 'sequelize/types';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     SequelizeModule.forRoot({
-      dialect: 'postgres',
+      dialect: process.env.DB_DIALECT as Dialect,
       host: process.env.DB_HOST_NAME,
       port: parseInt(process.env.DB_PORT),
       username: process.env.DB_USERNAME,

@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateNoteDto } from './dtos/createNoteDto';
+import { CreateNoteDto } from './dtos/create-note.dto';
 import { UpdateNoteDto } from './dtos/updateNoteDto';
 import { Note } from './entities/note.entity';
 import { NoteService } from './note.service';
