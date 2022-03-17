@@ -1,16 +1,21 @@
 import {
   AutoIncrement,
   BeforeCreate,
-  BeforeSave,
   Column,
+  HasMany,
   IsEmail,
   Model,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
 import { hash } from 'bcrypt';
+import { Note } from 'src/note/entities/note.entity';
 
-@Table({ paranoid: true })
+@Table({
+  paranoid: true,
+  // exclude following fields in select statements
+  defaultScope: { attributes: { exclude: ['password'] } },
+})
 export class User extends Model {
   @PrimaryKey
   @AutoIncrement
@@ -26,6 +31,9 @@ export class User extends Model {
 
   @Column
   password: string;
+
+  @HasMany(() => Note, { onDelete: 'cascade' })
+  notes: Note[];
 
   @BeforeCreate
   static async hashPassword(instance: User) {

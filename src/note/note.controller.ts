@@ -7,41 +7,52 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateNoteDto } from './dtos/create-note.dto';
 import { UpdateNoteDto } from './dtos/updateNoteDto';
 import { Note } from './entities/note.entity';
 import { NoteService } from './note.service';
 
 @Controller('notes')
+@UseGuards(JwtAuthGuard)
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @Get()
-  getAllNotes(): Promise<{ rows: Note[] }> {
-    return this.noteService.getAllNotes();
+  getAllNotes(@Req() req): Promise<{ rows: Note[] }> {
+    return this.noteService.getAllNotesOfUser(req.user.userId);
   }
 
-  @Get('/:id')
-  getNoteWithId(@Param('id', ParseIntPipe) id: number) {
-    return this.noteService.getNoteWithId(id);
+  @Get('/:noteId')
+  getNoteWithId(@Param('noteId', ParseIntPipe) noteId: number, @Req() req) {
+    return this.noteService.getNoteWithId(noteId, req.user.userId);
   }
 
   @Post()
-  createNote(@Body() createNoteDto: CreateNoteDto): Promise<Note> {
-    return this.noteService.createNote(createNoteDto);
+  createNote(@Body() createNoteDto: CreateNoteDto, @Req() req): Promise<Note> {
+    return this.noteService.createNote(createNoteDto, req.user.userId);
   }
 
-  @Patch('/:id')
+  @Patch('/:noteId')
   updateNote(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('noteId', ParseIntPipe) noteId: number,
+    @Req() req,
     @Body() updateNoteDto: UpdateNoteDto,
   ): Promise<[affectedCount: number]> {
-    return this.noteService.updateNote(updateNoteDto, { where: { id } });
+    return this.noteService.updateNote(updateNoteDto, {
+      where: { id: noteId, userId: req.user.userId },
+    });
   }
 
-  @Delete('/:id')
-  deleteNoteWithId(@Param('id', ParseIntPipe) id: number): Promise<number> {
-    return this.noteService.deleteNoteWithId(id);
+  @Delete('/:noteId')
+  deleteNoteWithId(
+    @Param('noteId', ParseIntPipe) noteId: number,
+    @Req() req,
+  ): Promise<number> {
+    return this.noteService.deleteNoteWithId(noteId, req.user.userId);
   }
 }

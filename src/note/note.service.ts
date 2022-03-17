@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { UpdateOptions } from 'sequelize';
+import { FindAndCountOptions, UpdateOptions, where } from 'sequelize';
+import { User } from 'src/user/entities/user.entity';
 import { CreateNoteDto } from './dtos/create-note.dto';
 import { UpdateNoteDto } from './dtos/updateNoteDto';
 import { Note } from './entities/note.entity';
@@ -9,12 +10,17 @@ import { Note } from './entities/note.entity';
 export class NoteService {
   constructor(@InjectModel(Note) private noteRepository: typeof Note) {}
 
-  getAllNotes(): Promise<{ rows: Note[]; count: Number }> {
-    return this.noteRepository.findAndCountAll<Note>();
+  getAllNotesOfUser(userId: number): Promise<{ rows: Note[]; count: Number }> {
+    return this.noteRepository.findAndCountAll<Note>({
+      where: { userId },
+      include: User,
+    });
   }
 
-  async getNoteWithId(id: number): Promise<Note> {
-    const note = await this.noteRepository.findByPk<Note>(id);
+  async getNoteWithId(noteId: number, userId: number): Promise<Note> {
+    const note = await this.noteRepository.findOne<Note>({
+      where: { id: noteId, userId },
+    });
 
     if (!note) {
       throw new NotFoundException();
@@ -23,8 +29,8 @@ export class NoteService {
     return note;
   }
 
-  createNote(createNoteDto: CreateNoteDto): Promise<Note> {
-    return this.noteRepository.create<Note>({ ...createNoteDto });
+  createNote(createNoteDto: CreateNoteDto, userId: number): Promise<Note> {
+    return this.noteRepository.create<Note>({ ...createNoteDto, userId });
   }
 
   async updateNote(
@@ -43,7 +49,7 @@ export class NoteService {
     return updateResult;
   }
 
-  deleteNoteWithId(id: number): Promise<number> {
-    return this.noteRepository.destroy<Note>({ where: { id } });
+  deleteNoteWithId(noteId: number, userId: number): Promise<number> {
+    return this.noteRepository.destroy<Note>({ where: { id: noteId, userId } });
   }
 }

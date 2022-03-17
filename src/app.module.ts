@@ -7,6 +7,7 @@ import { NoteModule } from './note/note.module';
 import { UserModule } from './user/user.module';
 import 'dotenv/config';
 import { Dialect } from 'sequelize/types';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Dialect } from 'sequelize/types';
     }),
     NoteModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
